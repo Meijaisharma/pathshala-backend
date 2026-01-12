@@ -1,0 +1,61 @@
+// 1. Provider changed to SQLite
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+// 2. Client generator settings
+generator client {
+  provider = "prisma-client-js"
+  binaryTargets = ["native"]
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  phone     String   @unique
+  name      String?
+  otp       String?
+  otpExpiry DateTime?
+  createdAt DateTime @default(now())
+  enrollments Enrollment[]
+}
+
+model Batch {
+  id          Int       @id @default(autoincrement())
+  title       String
+  description String?
+  thumbnail   String?
+  price       Float     @default(0)
+  subjects    Subject[]
+  tests       Test[]
+  enrollments Enrollment[]
+}
+
+model Subject {
+  id        Int     @id @default(autoincrement())
+  title     String
+  code      String
+  batchId   Int
+  batch     Batch   @relation(fields: [batchId], references: [id])
+  progress  Int     @default(0)
+}
+
+model Test {
+  id          Int      @id @default(autoincrement())
+  title       String
+  questions   Int
+  marks       Int
+  durationMin Int
+  scheduledAt DateTime
+  batchId     Int
+  batch       Batch    @relation(fields: [batchId], references: [id])
+}
+
+model Enrollment {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  batchId   Int
+  user      User     @relation(fields: [userId], references: [id])
+  batch     Batch    @relation(fields: [batchId], references: [id])
+  enrolledAt DateTime @default(now())
+}
